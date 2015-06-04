@@ -1,0 +1,80 @@
+<?xml version="1.0" encoding="utf-8"?>
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    android:orientation="vertical"
+    android:id="@+id/image_show">
+<RelativeLayout
+    android:layout_width="match_parent"
+    android:layout_height="500dp">
+
+    <ImageView
+        android:id="@+id/imgView"
+        android:layout_width="match_parent"
+        android:layout_height="500dp"
+        android:layout_weight="90"
+        android:adjustViewBounds="true"/>
+
+    <EditText
+        android:layout_width="match_parent"
+        android:layout_height="50dp"
+        android:id="@+id/addText1"
+        android:text="add text"
+        android:gravity="center_horizontal"
+        android:visibility="invisible"
+        android:layout_marginTop="50dp"
+        android:textSize="30sp"/>
+
+    <EditText
+        android:layout_width="match_parent"
+        android:layout_height="50dp"
+        android:id="@+id/addText3"
+        android:text="add text"
+        android:gravity="center_horizontal"
+        android:visibility="invisible"
+        android:layout_marginTop="200dp"
+        android:textSize="30sp"/>
+
+
+    <EditText
+        android:layout_width="match_parent"
+        android:layout_height="50dp"
+        android:id="@+id/addText2"
+        android:text="add text"
+        android:gravity="center_horizontal"
+        android:visibility="invisible"
+        android:layout_marginTop="400dp"
+        android:textSize="30sp"/>
+
+
+
+</RelativeLayout>
+
+    <LinearLayout
+        android:layout_width="match_parent"
+        android:layout_height="0dp"
+        android:layout_weight="16"
+        android:orientation="horizontal">
+
+        <Button
+            android:layout_width="0dp"
+            android:layout_height="match_parent"
+            android:layout_weight="3"
+            android:id="@+id/vanilla"
+            android:text="Vanilla"/>
+        <Button
+            android:layout_weight="3"
+            android:layout_width="0dp"
+            android:layout_height="match_parent"
+            android:id="@+id/demo"
+            android:text="Border"/>
+        <Button
+            android:layout_width="0dp"
+            android:layout_height="match_parent"
+            android:layout_weight="3"
+            android:id="@+id/addText"
+            android:text="Add Text"/>
+    </LinearLayout>
+
+
+</LinearLayout>
