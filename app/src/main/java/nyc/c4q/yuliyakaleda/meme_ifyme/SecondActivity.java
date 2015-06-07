@@ -39,8 +39,6 @@ public class SecondActivity extends Activity {
     Uri myUri;
     Bitmap bm;
 
-
-
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         Log.d(MainActivity.TAG, "SecondActivity.onCreate()");
@@ -56,14 +54,13 @@ public class SecondActivity extends Activity {
 
 
 
-
         Log.d(MainActivity.TAG, String.format("SecondActivity.onCreate() intent:", intent));
         bm = intent.getParcelableExtra("bitmap");
         image.setImageBitmap(bm);
 
 
 
-        //
+
         share.setOnClickListener(new View.OnClickListener() {
 
             @Override
