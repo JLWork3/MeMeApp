@@ -72,48 +72,12 @@ public class SecondActivity extends Activity {
 
             @Override
             public void onClick(View view) {
-                File shareFile = null;
-                try {
-                    shareFile = createJpgFile(bm);
-                } catch (IOException ex) {
-                    ex.printStackTrace();
-                }
-                shareVia(shareFile);
+
+                shareVia(bm);
             }
         });
 
     }
-
-    private File createJpgFile (Bitmap b) throws IOException {
-        OutputStream fOut = null;
-        jpgFile = createImageFile();
-        try{
-            fOut = new FileOutputStream(jpgFile);
-        } catch (IOException ex) {
-            ex.printStackTrace();
-        }
-        b.compress(Bitmap.CompressFormat.JPEG, 85, fOut);
-        try {
-            fOut.flush();
-        } catch (IOException ex){
-            ex.printStackTrace();
-        }
-        try {
-            fOut.close();
-        } catch (IOException ex){
-            ex.printStackTrace();
-        }
-
-        try {
-            MediaStore.Images.Media.insertImage(getContentResolver(), jpgFile.getAbsolutePath(), jpgFile.getName(), jpgFile.getName());
-        } catch (IOException ex){
-            ex.printStackTrace();
-        }
-
-
-        return jpgFile;
-    }
-
 
     private File createImageFile() throws IOException {
         // Create an image file name
@@ -133,19 +97,22 @@ public class SecondActivity extends Activity {
     }
 
     //method to share an image via social networks
-    public void shareVia(File attachment) {
-        Intent sharingIntent = new Intent(Intent.ACTION_SEND);
-        attachment = null;
+    public void shareVia(Bitmap mBitmap) {
+        Intent share = new Intent(Intent.ACTION_SEND);
+        share.setType("image/jpeg");
+        ByteArrayOutputStream bytes = new ByteArrayOutputStream();
+        mBitmap.compress(Bitmap.CompressFormat.JPEG, 100, bytes);
+        File f;
         try {
-            attachment = createImageFile();
-        } catch (IOException ex) {
-            ex.printStackTrace();
+            f = createImageFile();
+            FileOutputStream fo = new FileOutputStream(f);
+            fo.write(bytes.toByteArray());
+            fo.close();
+        } catch (IOException e) {
+            e.printStackTrace();
         }
-        if (attachment != null) {
-            sharingIntent.setType("image/jpeg");
-            sharingIntent.putExtra(Intent.EXTRA_STREAM, attachment.toURI());
-            startActivity(Intent.createChooser(sharingIntent, "Share image using"));
-        }
+        share.putExtra(Intent.EXTRA_STREAM, Uri.parse(mCurrentPhotoPath));
+        startActivity(Intent.createChooser(share, "Share Image"));
     }
 }
 
