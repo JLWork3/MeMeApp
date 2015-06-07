@@ -3,8 +3,12 @@ package nyc.c4q.yuliyakaleda.meme_ifyme;
 import android.app.Activity;
 import android.content.ClipData;
 import android.content.Intent;
+import android.graphics.Bitmap;
+import android.graphics.BitmapFactory;
 import android.net.Uri;
 import android.os.Bundle;
+import android.os.Environment;
+import android.provider.MediaStore;
 import android.util.Log;
 import android.view.DragEvent;
 import android.view.MotionEvent;
@@ -19,10 +23,14 @@ import android.widget.TextView;
 
 import java.io.ByteArrayOutputStream;
 import java.io.File;
+import java.io.FileInputStream;
 import java.io.FileNotFoundException;
 import java.io.FileOutputStream;
 import java.io.IOException;
 import java.io.InputStream;
+import java.io.OutputStream;
+import java.text.SimpleDateFormat;
+import java.util.Date;
 
 /**
  * Created by July on 5/31/15.
@@ -30,14 +38,17 @@ import java.io.InputStream;
 public class SecondActivity extends Activity {
 
 
+    String mCurrentPhotoPath;
     ImageView image;
     TextView tv;
     Button share;
     Uri myUri;
-    private android.widget.RelativeLayout.LayoutParams layoutParams;
+    Bitmap bm;
+    File jpgFile;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
+        Log.d(MainActivity.TAG, "SecondActivity.onCreate()");
         super.onCreate(savedInstanceState);
         setContentView(R.layout.image);
 
@@ -47,111 +58,61 @@ public class SecondActivity extends Activity {
 
         //get the uri from the intent sent from MainActivity
         Intent intent = getIntent();
-        myUri = intent.getParcelableExtra("uri");
-
-        image.setImageURI(myUri);
-        tv.setText("hello world");
-
-//        tv.setOnLongClickListener(new View.OnLongClickListener() {
-//            @Override
-//            public boolean onLongClick(View v) {
-//                ClipData.Item item = new ClipData.Item((CharSequence)v.getTag());
-//                String[] mimeTypes = {ClipDescription.MIMETYPE_TEXT_PLAIN};
-//
-//                ClipData dragData = new ClipData(v.getTag().toString(),mimeTypes, item);
-//                View.DragShadowBuilder myShadow = new View.DragShadowBuilder(tv);
-//
-//                v.startDrag(dragData,myShadow,null,0);
-//                return true;
-//            }
-//        });
 
 
-        tv.setOnDragListener(new View.OnDragListener() {
-            @Override
-            public boolean onDrag(View v, DragEvent event) {
-                switch (event.getAction()) {
-                    case DragEvent.ACTION_DRAG_STARTED:
-                        layoutParams = (RelativeLayout.LayoutParams) v.getLayoutParams();
-                        Log.d("y", "Action is DragEvent.ACTION_DRAG_STARTED");
 
-                        // Do nothing
-                        break;
+        Log.d(MainActivity.TAG, String.format("SecondActivity.onCreate() intent:", intent));
+        bm = intent.getParcelableExtra("bitmap");
+        image.setImageBitmap(bm);
 
-                    case DragEvent.ACTION_DRAG_ENTERED:
-                        Log.d("y", "Action is DragEvent.ACTION_DRAG_ENTERED");
-                        int x_cord = (int) event.getX();
-                        int y_cord = (int) event.getY();
-                        break;
 
-                    case DragEvent.ACTION_DRAG_EXITED:
-                        Log.d("y", "Action is DragEvent.ACTION_DRAG_EXITED");
-                        x_cord = (int) event.getX();
-                        y_cord = (int) event.getY();
-                        layoutParams.leftMargin = x_cord;
-                        layoutParams.topMargin = y_cord;
-                        v.setLayoutParams(layoutParams);
-                        tv.setText("h");
-                        break;
 
-                    case DragEvent.ACTION_DRAG_LOCATION:
-                        Log.d("y", "Action is DragEvent.ACTION_DRAG_LOCATION");
-                        x_cord = (int) event.getX();
-                        y_cord = (int) event.getY();
-                        break;
 
-                    case DragEvent.ACTION_DRAG_ENDED:
-                        Log.d("y", "Action is DragEvent.ACTION_DRAG_ENDED");
-
-                        // Do nothing
-                        break;
-
-                    case DragEvent.ACTION_DROP:
-                        Log.d("y", "ACTION_DROP event");
-                        tv.getX();
-                        tv.getY();
-
-                        break;
-                    default:
-                        break;
-                }
-                return true;
-            }
-        });
-
-        tv.setOnTouchListener(new View.OnTouchListener() {
-            @Override
-            public boolean onTouch(View v, MotionEvent event) {
-                if (event.getAction() == MotionEvent.ACTION_DOWN) {
-                    ClipData data = ClipData.newPlainText("", "");
-                    View.DragShadowBuilder shadowBuilder = new View.DragShadowBuilder(tv);
-
-                    tv.startDrag(data, shadowBuilder, tv, 0);
-                    tv.setVisibility(View.INVISIBLE);
-                    return true;
-                } else {
-                    return false;
-                }
-            }
-        });
-
-        //
         share.setOnClickListener(new View.OnClickListener() {
 
             @Override
             public void onClick(View view) {
-                shareVia();
+
+                shareVia(bm);
             }
         });
 
     }
 
+    private File createImageFile() throws IOException {
+        // Create an image file name
+        String timeStamp = new SimpleDateFormat("yyyyMMdd_HHmmss").format(new Date());
+        String imageFileName = "JPEG_" + timeStamp + "_";
+        File storageDir = Environment.getExternalStoragePublicDirectory(
+                Environment.DIRECTORY_PICTURES);
+        File image = File.createTempFile(
+                imageFileName,  /* prefix */
+                ".jpg",         /* suffix */
+                storageDir      /* directory */
+        );
+
+        // Save a file: path for use with ACTION_VIEW intents
+        mCurrentPhotoPath = "file:" + image.getAbsolutePath();
+        return image;
+    }
+
     //method to share an image via social networks
-    public void shareVia() {
-        Intent sharingIntent = new Intent(Intent.ACTION_SEND);
-        sharingIntent.setType("image/jpeg");
-        sharingIntent.putExtra(Intent.EXTRA_STREAM, myUri);
-        startActivity(Intent.createChooser(sharingIntent, "Share image using"));
+    public void shareVia(Bitmap mBitmap) {
+        Intent share = new Intent(Intent.ACTION_SEND);
+        share.setType("image/jpeg");
+        ByteArrayOutputStream bytes = new ByteArrayOutputStream();
+        mBitmap.compress(Bitmap.CompressFormat.JPEG, 100, bytes);
+        File f;
+        try {
+            f = createImageFile();
+            FileOutputStream fo = new FileOutputStream(f);
+            fo.write(bytes.toByteArray());
+            fo.close();
+        } catch (IOException e) {
+            e.printStackTrace();
+        }
+        share.putExtra(Intent.EXTRA_STREAM, Uri.parse(mCurrentPhotoPath));
+        startActivity(Intent.createChooser(share, "Share Image"));
     }
 }
 
